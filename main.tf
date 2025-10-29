@@ -16,6 +16,20 @@ data "tfe_organization" "org" {
   name = var.organization_name
 }
 
+# Assign team access to projects based on config.team_access
+locals {
+  project_team_access_entries = merge([
+    for project_name, project in local.projects_from_config : (
+      length(try(project.team_access, {})) > 0
+      ? [for team_name, tac in project.team_access : {
+          key = "${project_name}:${team_name}"
+          value = { project = project_name, team_name = team_name, access = tac.access }
+        }]
+      : []
+    )
+  ]...)
+}
+
 # Create teams dynamically
 resource "tfe_team" "team" {
   for_each = var.teams_config
@@ -48,19 +62,6 @@ resource "tfe_project" "project" {
   organization = data.tfe_organization.org.name
 }
 
-# Assign team access to projects based on config.team_access
-locals {
-  project_team_access_entries = merge([
-    for project_name, project in local.projects_from_config : (
-      length(try(project.team_access, {})) > 0
-      ? [for team_name, tac in project.team_access : {
-          key = "${project_name}:${team_name}"
-          value = { project = project_name, team_name = team_name, access = tac.access }
-        }]
-      : []
-    )
-  ]...)
-}
 
 resource "tfe_team_project_access" "project_team_access" {
   for_each = { for item in local.project_team_access_entries : item.key => item.value }
