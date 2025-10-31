@@ -11,41 +11,34 @@ variable "environments" {
   default     = ["dev", "prod"]
 }
 
-variable "evo_taskers_sub_apps" {
-  type        = list(string)
-  description = "List of sub-apps for evo-taskers"
-  default     = ["sub1", "sub2"]
+# Control whether this module creates projects or references existing ones
+variable "create_projects" {
+  type        = bool
+  description = "If true, create TFE projects. If false, look up existing projects by name."
+  default     = true
 }
 
-# Flexible configuration to define projects, workspaces, and team access.
-# Example shape:
-# projects_config = {
-#   "infrastructure" = {
-#     workspaces = {
-#       common  = { per_environment = true }
-#       network = { per_environment = true, team_access = { network = { access = "custom", permissions = { runs = "apply", variables = "write" } } } }
-#     }
-#     team_access = { infrastructure = { access = "admin" } }
-#   }
-#   "revms" = {
-#     workspaces = { revms = { per_environment = true } }
-#     team_access = { revms_app = { access = "write" } }
-#   }
-#   "evo-taskers" = {
-#     workspaces = {
-#       "evo-taskers-common" = { per_environment = true }
-#       # Pattern workspaces generated for each sub app when pattern contains ${app}
-#       "evo-taskers-${app}" = { per_environment = true, apps = var.evo_taskers_sub_apps }
-#     }
-#     team_access = { evo_taskers_app = { access = "write" } }
-#   }
-# }
+# Control whether this module creates teams or references existing ones
+variable "create_teams" {
+  type        = bool
+  description = "If true, create TFE teams. If false, look up existing teams by name."
+  default     = true
+}
+
+#
 variable "projects_config" {
   description = "Declarative configuration for projects, workspaces, and team access"
   type = map(object({
     workspaces = map(object({
       per_environment = optional(bool, true)
       apps            = optional(list(string), [])
+      environments    = optional(list(string), null)
+      vcs_repo        = optional(object({
+        identifier      = string       # e.g. "github-org/repo"
+        oauth_token_id  = string       # TFE OAuth token ID
+        branch          = optional(string, null)
+        ingress_submodules = optional(bool, null)
+      }), null)
       team_access     = optional(map(object({
         access = string
         permissions = optional(object({
@@ -63,21 +56,7 @@ variable "projects_config" {
   default = {}
 }
 
-# Declarative team definitions (name => config)
-# Example:
-# teams_config = {
-#   application-admin = {
-#     visibility = "organization"
-#     organization_access = {
-#       manage_projects   = true
-#       manage_workspaces = true
-#       manage_teams      = true
-#       read_projects     = true
-#       read_workspaces   = true
-#     }
-#   }
-#   network = { visibility = "organization" }
-# }
+#
 variable "teams_config" {
   description = "Teams to create and their optional org-level permissions"
   type = map(object({
