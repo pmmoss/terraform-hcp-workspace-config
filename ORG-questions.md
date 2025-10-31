@@ -1,7 +1,7 @@
 That's an excellent approach. To successfully implement Terraform Cloud in a large, scattered company, you need to treat it as an organizational change project, not just a technical one. The key is gathering the right scoping information to design a robust Organization/Workspace structure and establish clear Governance.
 
 Here is a structured plan outlining what you need to know and gather from your directors, organized by area of focus.
-
+ 
 🏛️ Organizational Structure & Governance
 The goal is to map your physical organization to your Terraform Cloud organization, teams, and projects.
 
