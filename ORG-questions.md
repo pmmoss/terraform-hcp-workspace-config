@@ -1,4 +1,4 @@
-# Terraform Cloud Organization Planning Guide - AI Generates
+# Terraform Cloud Organization Planning Guide - AI Generated
 
 That's an excellent approach. To successfully implement Terraform Cloud in a large, scattered company, you need to treat it as an organizational change project, not just a technical one. The key is gathering the right scoping information to design a robust Organization/Workspace structure and establish clear Governance.
 
